@@ -3,21 +3,18 @@ import torch
 import cv2
 
 model = torch.hub.load('ultralytics/yolov5', 'custom', 'can_recognition.pt')
+camera = cv2.VideoCapture(0)
+if not camera.isOpened():
+    del(camera)
+    exit
 
 app = Flask(__name__)
 
 def frame():
-    camera = cv2.VideoCapture(0)
-    while not camera.isOpened():
-        camera = cv2.VideoCapture(0)
-    while True:
-        retval, img = camera.read()
-        if not retval:
-            continue
-        imencode = cv2.imencode('.jpg', img)[1]
-        data = imencode.tobytes()
-        yield(b'--frame\r\n'
-              b'Content-Type: image/jpeg\r\n\r\n' + data + b'\r\n')
+    retval, img = camera.read()
+    imencode = cv2.imencode('.jpg', img)[1]
+    data = imencode.tobytes()
+    return b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + data + b'\r\n'
 
 @app.route('/')
 def entry():
@@ -25,5 +22,7 @@ def entry():
 
 if __name__ == '__main__':
     app.run(host = 'localhost', port = '8080', threaded = True)
+    camera.release()
+    del(camera)
     del(app)
 
