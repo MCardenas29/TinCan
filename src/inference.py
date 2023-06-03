@@ -9,7 +9,7 @@ from datetime import datetime
 
 FPS = 30
 FRAME_SIZE = 640, 480
-DEV_INDEX = 0
+DEV_INDEX = 2
 
 # Thread main routine
 def main(event):
@@ -23,7 +23,7 @@ def main(event):
     good_prom = 0
     bad_prom = 0
     # last_timestamp = time.time()
-    model = torch.hub.load('ultralytics/yolov5', 'custom', './models/m1.pt')
+    model = torch.hub.load('ultralytics/yolov5', 'custom', './models/a.onnx')
     camera = cv2.VideoCapture(DEV_INDEX)
     # Verify that the video device is succesfully opened
     if not camera.isOpened():
@@ -46,6 +46,7 @@ def main(event):
         if not ret:
             continue
 
+        frame = cv2.resize(frame, (640, 640))
         diff = time.time() - init_time
         res = model(frame)
         res.render()
