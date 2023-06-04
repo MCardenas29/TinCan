@@ -3,7 +3,7 @@ from threading import Lock
 from firebase import firebase
 
 
-firebase = firebase.FirebaseApplication("https://yolotroll-6ef4a-default-rtdb.firebaseio.com", None)
+fb = firebase.FirebaseApplication("https://yolotroll-6ef4a-default-rtdb.firebaseio.com/", None)
 app = Flask(__name__)
 frames = [None, None]
 in_lock = Lock()

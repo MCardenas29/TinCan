@@ -4,12 +4,11 @@ import torch
 import cv2
 import src.app as app
 from threading import Event
-from firebase import firebase
 from datetime import datetime
 
 FPS = 30
 FRAME_SIZE = 640, 480
-DEV_INDEX = 2
+DEV_INDEX = 0
 
 # Thread main routine
 def main(event):
@@ -56,44 +55,44 @@ def main(event):
         app.frames[1] = res.ims[0]
         # cv2.imwrite('current_frame.png', frame)
         # cv2.imwrite('res.png', res.ims[0])
-    if(diff >= 1):
-        init_time = time.time() - diff + 1
-        current_seg += 1
-        five_count += 1
-        for v in res.pandas().xyxy[0].get('name'):
-            total_cans += 1
-            if(v == 'OK'):
-                good_cans += 1
-            elif(v == 'BAD'):
-                bad_cans +=1
+        if(diff >= 1):
+            init_time = time.time() - diff + 1
+            current_seg += 1
+            five_count += 1
+            for v in res.pandas().xyxy[0].get('name'):
+                total_cans += 1
+                if(v == 'OK'):
+                    good_cans += 1
+                elif(v == 'BAD'):
+                    bad_cans +=1
 
-    if(current_seg >= 60):
-        minuts += 1
-        current_seg = 0
+        if(current_seg >= 60):
+            minuts += 1
+            current_seg = 0
 
-    if(minuts >= 1):
-        now = datetime.now()
-        good_prom = good_cans / total_cans
-        bad_prom = bad_cans / total_cans
-        print(good_prom)
-        print(bad_prom)
-        datos_g={
-            'promedio' : good_prom,
-            'fecha' : now
-        }
-        datos_b={
-            'promedio' : bad_prom,
-            'fecha' : now
-        }
-        god_res = firebase.post('/buenas', datos_g)
-        bad_res = firebase.post('/malas', datos_b)
+        if(minuts >= 1):
+            now = datetime.now()
+            good_prom = (good_cans / total_cans) * 100
+            bad_prom = (bad_cans / total_cans) * 100
+            print(good_prom)
+            print(bad_prom)
+            datos_g={
+                'promedio' : good_prom,
+                'fecha' : now
+            }
+            datos_b={
+                'promedio' : bad_prom,
+                'fecha' : now
+            }
+            god_res = app.fb.post('/buenas', datos_g)
+            bad_res = app.fb.post('/malas', datos_b)
 
-        total_cans = 0
-        good_cans = 0
-        bad_cans = 0
-        good_prom = 0
-        bad_prom = 0
-    minuts = 0
+            total_cans = 0
+            good_cans = 0
+            bad_cans = 0
+            good_prom = 0
+            bad_prom = 0
+            minuts = 0
 
 
     camera.release()
